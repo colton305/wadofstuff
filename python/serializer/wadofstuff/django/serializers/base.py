@@ -1,9 +1,5 @@
 """New base serializer class to handle full serialization of model objects."""
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
-
+import io
 from django.core.serializers import base
 
 
@@ -33,7 +29,7 @@ class Serializer(base.Serializer):
                 Methods cannot take arguments.
         """
         self.options = options
-        self.stream = options.pop("stream", StringIO())
+        self.stream = options.pop("stream", io.StringIO())
         self.fields = options.pop("fields", [])
         self.excludes = options.pop("excludes", [])
         self.relations = options.pop("relations", [])
@@ -49,7 +45,7 @@ class Serializer(base.Serializer):
             for field in concrete_class._meta.local_fields:
                 attname = field.attname
                 if field.serialize:
-                    if field.rel is None:
+                    if field.remote_field is None:
                         if attname not in self.excludes:
                             if not self.fields or attname in self.fields:
                                 self.handle_field(obj, field)
